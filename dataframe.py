@@ -2,13 +2,11 @@ import pandas as pd
 import numpy as np
 import json
 import duckdb
+from sample_data import COURSES 
 
 
-# Load the data
 with open('mines_catalog.json', 'r') as f:
     data = json.load(f)
-
-# Convert directly
 df = pd.DataFrame(data)
 
 
@@ -33,5 +31,58 @@ df_split = duckdb.query(query).to_df()
 df_split = df_split.replace('None', np.nan, inplace=True)
 
 coursedf = df_split
-print(coursedf)
+#print(coursedf)
+
+import pandas as pd
+import duckdb
+from sample_data import COURSES
+
+import pandas as pd
+from sample_data import COURSES
+
+course_rows = []
+section_rows = []
+timeblock_rows = []
+
+# Using a set to keep track of unique time patterns to avoid duplicates
+seen_timeblocks = {}
+
+for course in COURSES:
+    for section in course.sections:
+        # 1. df_courses: Info about the class itself
+        course_rows.append({
+            "crn": section.course_reg_num,
+            "course_code": f"{course.department} {course.course_code}",
+            "course_name": course.name
+        })
+
+        for block in section.time_blocks:
+            # Create a unique key based on the day/start/end
+            tb_key = (block.day, block.start, block.end)
+            
+            # Generate a consistent ID for this specific time slot
+            if tb_key not in seen_timeblocks:
+                tb_id = len(seen_timeblocks) + 1 # Simple integer ID
+                seen_timeblocks[tb_key] = tb_id
+                
+                # 2. df_timeblocks: Purely time data (No course info!)
+                timeblock_rows.append({
+                    "timeblock_id": tb_id,
+                    "day": block.day,
+                    "start": block.start,
+                    "end_time": block.end
+                })
+            
+            # 3. df_sections: The bridge linking CRN to TimeBlock IDs
+            section_rows.append({
+                "crn": section.course_reg_num,
+                "section_id": section.section_id,
+                "timeblock_id": seen_timeblocks[tb_key]
+            })
+
+# Convert to DataFrames
+df_courses = pd.DataFrame(course_rows).drop_duplicates()
+df_sections = pd.DataFrame(section_rows)
+df_timeblocks = pd.DataFrame(timeblock_rows)
+
 

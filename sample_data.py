@@ -20,8 +20,8 @@ math458 = Course(
 )
 
 math408 = Course(
-    name="COMPUTATIONAL METHODS FOR DIFFERENTIAL EQUATIONS",
-    course_code="A",
+    name="",
+    course_code="COMPUTATIONAL METHODS FOR DIFFERENTIAL EQUATIONS",
     department="MATH",
     sections=[
         Section(
@@ -100,7 +100,7 @@ math455 = Course(
         Section(
             course_reg_num="80138",
             section_id="A",
-            course_code="455",
+            course_code="324",
             department="MATH",
             time_blocks=[
                 TimeBlock(day=1, start=14*60, end=15*60+15),

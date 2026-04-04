@@ -28,3 +28,13 @@ if __name__ == "__main__":
         print("Conflict detected between sec_b and my_schedule.")
     else:
         print("No conflict detected between sec_b and my_schedule.")
+        
+def is_valid(section: Section) -> bool:
+    DAY_START = 7*60
+    DAY_END = 14*60
+    
+    for tb in section.time_blocks:
+        if tb.start < DAY_START or tb.end > DAY_END:
+            return False
+        
+    return True

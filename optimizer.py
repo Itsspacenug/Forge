@@ -109,8 +109,25 @@ def short_day_penalty(schedule: list[Section]) -> int:
         
     return total_penalty
 
+def lunch_penalty(schedule: list[Section]) -> int:
+    penalty = 0
+    blocks_by_day = {}
+    blocks = get_all_time_block(schedule)
+    
+    for tb in blocks:
+        if tb.day not in blocks_by_day:
+            blocks_by_day[tb.day] = []
+        blocks_by_day[tb.day].append(tb)
+    for day, day_blocks in blocks_by_day.items():
+        for i in range(len(day_blocks)):
+            block = day_blocks[i]
+            if block.start > 660:
+                penalty += block.start - 660
+            if block.end < 810:
+                penalty += 810 - block.end
+    return (penalty/5)
 
-# lunch break preservation
+
 # Gaps between classes (different from lunch break?)
 # Back-to-back classes
 

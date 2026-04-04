@@ -125,7 +125,7 @@ def lunch_penalty(schedule: list[Section]) -> int:
                 penalty += block.start - 660
             if block.end < 810:
                 penalty += 810 - block.end
-    return (penalty//5)
+    return -(penalty//5)
 
 
 # Gaps between classes (different from lunch break?)

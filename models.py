@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 @dataclass
 class TimeBlock:
-    day: int
+    day: str
     start: int  # minutes from midnight
     end: int    # minutes from midnight
 

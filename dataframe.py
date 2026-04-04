@@ -17,7 +17,7 @@ df['name'] = df.apply(lambda x: x['name'].replace(x['code'] + '.', '').strip(), 
 
 query = """
 SELECT
-    code,
+    CONCAT(SUBSTRING(code, 1, 4), ' ', SUBSTRING(code, 5)) as code,
     split_part(name, '.', 1) AS title,
     regexp_extract(name, '(\d+[.-]\d+)') AS credithours,
     prereqs,
@@ -81,9 +81,24 @@ timeblocksdf = pd.DataFrame(timeblock_rows)
 
 
 # Manual error cleanup
-# This is usually safer and faster for single-row fixes
 inputdf.loc[inputdf['crn'] == '80643', 'course_name'] = 'COMPUTATIONAL METHODS FOR DIFFERENTIAL EQUATIONS'
 inputdf.loc[inputdf['crn'] == '80643', 'course_code'] = 'MATH 408'
 
-print(inputdf)
+# query = "SELECT * 
+# FROM inputdf
+# JOIN coursedf ON inputdf.course_code = coursedf.code
+# JOIN sectiondf ON inputdf.crn = sectiondf.crn
+# JOIN timeblockdf ON sectiondf.timeblock_id = timeblockdf.timeblock_id"
+
+
+# query = "SELECT * 
+# FROM coursedf
+# JOIN sectiondf ON CONCAT(SUBSTRING(coursedf.code, 1, 3), ' ', SUBSTRING(coursedf.code, 4)) = sectiondf.course_code
+# JOIN timeblockdf ON sectiondf.timeblock_id = timeblockdf.timeblock_id"
+
+
+
+
+
+
 

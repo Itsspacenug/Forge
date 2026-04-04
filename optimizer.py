@@ -125,8 +125,7 @@ def lunch_penalty(schedule: list[Section]) -> int:
                 penalty += block.start - 660
             if block.end < 810:
                 penalty += 810 - block.end
-
-    return -(penalty/5)
+    return -(penalty//5)
 
 
 # Gaps between classes (different from lunch break?)
@@ -140,8 +139,9 @@ def calculate_total_score(schedule : list[Section], weights: dict) -> int:
     many = more_days_penalty(schedule)
     short = long_day_penalty(schedule)
     long = short_day_penalty(schedule)
+    lunch = lunch_penalty(schedule)
 
-    score = (weights.get("compactness",1.0)*compact)+(weights.get("early_morning", 1.0)*early)+(weights.get("late_evening", 1.0)*late)+(weights.get("more_days",1.0)*few)+(weights.get("few_days",1.0)*many)+(weights.get("short_days", 1.0)*short)+(weights.get("long_days",1.0)*long)
+    score = (weights.get("compactness",1.0)*compact)+(weights.get("early_morning", 1.0)*early)+(weights.get("late_evening", 1.0)*late)+(weights.get("more_days",1.0)*few)+(weights.get("few_days",1.0)*many)+(weights.get("short_days", 1.0)*short)+(weights.get("long_days",1.0)*long)+(weights.get("lunch_breaks",1.0)*lunch)
     
 
     return score

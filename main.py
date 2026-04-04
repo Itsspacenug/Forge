@@ -19,7 +19,8 @@ user_weights = {
     "more_days": 1.5,
     "few_days": 0.75,
     "short_days": 1.5,
-    "long_days": 0.5
+    "long_days": 0.5,
+    "lunch_breaks": 3
 }
 
 

@@ -37,6 +37,26 @@ export default function OptimizerPage() {
             timeblock_id: s.time_blocks.map((_, i) => `${s.course_code}-${s.section_id}-${i}`),
         }));
 
+    const timeblockdf = sections.flatMap(s =>
+        s.time_blocks.map((tb, i) => ({
+            timeblock_id: `${s.course_code}-${s.section_id}-${i}`,
+            day: tb.day,
+            start: tb.start,
+            end: tb.end,
+        }))
+    )
+
+    return { inputdf, sectiondf, timeblockdf }
+}
+
+export default function OptimizerPage({ onSelectSchedule }) {
+    const [selectedCourses, setSelectedCourses] = useState([])
+    const [weights, setWeights] = useState(DEFAULT_WEIGHTS)
+    const [results, setResults] = useState([])
+    const [currentIndex, setCurrentIndex] = useState(0)
+
+    const { mutate, isPending, isError, error } = useOptimizer()
+
         const timeblockdf = sections.flatMap(s =>
             s.time_blocks.map((tb, i) => ({
                 timeblock_id: `${s.course_code}-${s.section_id}-${i}`,
@@ -136,13 +156,17 @@ export default function OptimizerPage() {
                         </button>
                     </div>
 
-                    <WeeklyGrid
-                        {...toGridProps(results[currentIndex].sections)}
-                        coursedf={[]} 
-                        onBlockClick={() => {}}
-                    />
-                </div>
-            )}
-        </div>
-    );
+                <WeeklyGrid
+                    {...toGridProps(results[currentIndex].sections)}
+                    coursedf={[]}
+                    onBlockClick={() => {}}
+                />
+                <button onClick={() => onSelectSchedule(results[currentIndex])}>
+                    View Full Schedule
+                </button>
+
+            </div>
+        )}
+    </div>
+)
 }

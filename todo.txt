@@ -1,0 +1,3 @@
+1. fix two children with one key
+2. use scheduleNax for the 3 schedules 
+3. print when there are no possible schedules 

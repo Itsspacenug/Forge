@@ -47,6 +47,23 @@ const headerStyle = {
 const WeeklyGrid = ({ inputdf, coursedf, sectiondf, timeblockdf, onBlockClick }) => {
   return (
     <div style={wrapperStyle}>
+      <div style={{ width: '50px', flexShrink: 0 }}>
+        <div style={{ height: '30px' }} /> {/* spacer to match day header height */}
+        <div style={{ width: '50px', position: 'relative', height: `${15 * 60 * PIXELS_PER_MINUTE}px` }}>
+          {Array.from({ length: 15 }, (_, i) => i + 7).map(hour => (
+              <div key={hour} style={{
+                  position: 'absolute',
+                  top: `${(hour - 7) * 60 * PIXELS_PER_MINUTE}px`,
+                  fontSize: '11px',
+                  color: '#9ca3af',
+                  right: '4px',
+              }}>
+                  {hour < 12 ? `${hour}am` : hour === 12 ? '12pm' : `${hour - 12}pm`}
+              </div>
+            ))}
+          </div>
+      </div>
+
       {DAYS.map((dayName, dayIndex) => (
         <div key={dayName} style={{ flex: 1 }}>
           <div style={headerStyle}>{dayName}</div>

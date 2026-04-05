@@ -96,15 +96,9 @@ export default function OptimizerPage({ onSelectSchedule }) {
             <PreferenceSliders weights={weights} onChange={handleWeightChange} />
 
             {isError && (
-                <div style={{ color: 'red', marginTop: '12px', padding: '10px', background: '#fee2e2', borderRadius: '4px'}}>
-                    <strong>Optimization Error:</strong>
-                    {/* Check if it's a validation error with details */}
-                    {error.response?.data?.invalid_codes ? (
-                        <p> The following codes are invalid: {error.response.data.detail.invalid_codes.join(', ')}</p>
-                    ) : (
-                        <p>{error.message}</p>
-                    )}
-                </div>
+                <p style={{ color: 'red', marginTop: '12px' }}>
+                    Something went wrong: {error.message}
+                </p>
             )}
 
             <button

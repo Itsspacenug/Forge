@@ -1,4 +1,26 @@
 const WeeklyGrid = ({ inputdf, coursedf, sectiondf, timeblockdf, onBlockClick }) => {
+// From the API response schedule.sections, build the flat arrays
+
+const inputdf = schedule.sections.map(s => ({
+    crn: s.course_reg_num,
+    code: s.course_code
+}))
+
+const sectiondf = schedule.sections.map(s => ({
+    crn: s.course_reg_num,
+    section_id: s.section_id,
+    timeblock_id: s.time_blocks.map((_, i) => `${s.course_reg_num}-${i}`)
+}))
+
+const timeblockdf = schedule.sections.flatMap(s =>
+    s.time_blocks.map((tb, i) => ({
+        timeblock_id: `${s.course_reg_num}-${i}`,
+        day: tb.day,
+        start: tb.start,
+        end: tb.end
+    }))
+)
+
   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
   return (

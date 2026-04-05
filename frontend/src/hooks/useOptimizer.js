@@ -1,3 +1,8 @@
-import { post } from '.../api/client'
+import { useMutation } from '@tanstack/react-query'
+import { post } from '../api/client'
 
-post('/optimize', { courses, weights })
+export function useOptimizer() {
+    return useMutation({
+        mutationFn: ({ courses, preferences }) => post('/optimize', { courses, preferences }),
+    })
+}

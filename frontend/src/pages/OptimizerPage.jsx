@@ -2,6 +2,7 @@ import { useState } from 'react'
 import CourseSearch from '../components/CourseSearch'
 import CourseChips from '../components/CourseChips'
 import PreferenceSliders from '../components/PreferenceSliders'
+import { useOptimizer } from '../hooks/useOptimizer'
 
 const DEFAULT_WEIGHTS = {
     compactness: 0.5,
@@ -14,6 +15,8 @@ const DEFAULT_WEIGHTS = {
 export default function OptimizerPage() {
     const [selectedCourses, setSelectedCourses] = useState([])
     const [weights, setWeights] = useState(DEFAULT_WEIGHTS)
+
+    const { mutate, isPending, isError, error } = useOptimizer()
 
     const handleAdd = (course) => {
         if (selectedCourses.find(c => c.code === course.code)) return
@@ -29,7 +32,17 @@ export default function OptimizerPage() {
     }
 
     const handleGenerate = () => {
-        console.log('Generating with:', { selectedCourses, weights })
+        mutate(
+            { courses: selectedCourses, preferences: weights },
+            {
+                onSuccess: (data) => {
+                    console.log('Schedules recieved:', data.results)
+                },
+                onError: (err) => {
+                    console.error('Optimize failed:',err)
+                },
+            }
+        )
     }
 
     return (
@@ -55,22 +68,28 @@ export default function OptimizerPage() {
                 onChange={handleWeightChange}
             />
 
+            {isError && (
+                <p style={{ color: 'red', marginTop: '12px' }}>
+                    Something went wrong: {error.message}
+                </p>
+            )}
+
             <button
                 onClick={handleGenerate}
-                disabled={selectedCourses.length === 0}
+                disabled={selectedCourses.length === 0 || isPending}
                 style={{
                     marginTop: '32px',
                     width: '100%',
                     padding: '12px',
-                    background: selectedCourses.length == 0 ? '#d1d5db' : '#4f46e5',
+                    background: selectedCourses.length == 0 || isPending ? '#d1d5db' : '#4f46e5',
                     color: 'white',
                     border: 'none',
                     borderRadius: '8px',
                     fontSize: '16px',
-                    cursor: selectedCourses.length === 0 ? 'not-allowed' : 'pointer',
+                    cursor: selectedCourses.length === 0 || isPending ? 'not-allowed' : 'pointer',
                 }}
             >
-                Generate schedules
+                {isPending ? 'Generating...' : 'Generate schedules'}
             </button>
         </div>
     )

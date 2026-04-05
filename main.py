@@ -68,6 +68,7 @@ def run_optimize(request: OptimizeRequests):
             "score": calculate_total_score(schedule, request.preferences),
             "sections": [
                 {
+                    "course_reg_num": s.course_reg_num,
                     "course_code": s.course_code,
                     "section_id": s.section_id,
                     "time_blocks": [

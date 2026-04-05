@@ -1,10 +1,10 @@
-from fastapi import FastAPI
-from fastapi import HTTPException
+from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator
 from fake_data import load_courses
 from generator import find_all_schedules
 from optimizer import calculate_total_score
+import re
 
 COURSES = load_courses()
 
@@ -22,8 +22,14 @@ app.add_middleware(
 # Defines the format of the data that we expect to in the POST request body
 # Pydantic validates it automatically and if frontend sends wrong data, Pydantic errors cleanly
 class OptimizeRequests(BaseModel):
-    course_codes: list[str]
+    course_codes: list[str] = Field(..., min_items = 1, max_items=10)
     preferences: dict[str, float]
+    
+    @field_validator('course_codes')
+    @classmethod
+    def validate_and_format(cls, v: list[str]) -> list[str]:
+        pattern = re.compile(r"^[a-zA-Z]{3,4}\d{3}$")
+        return [code.upper() for code in v if pattern.match(code) or exec('raise ValueError(...)')]
 
 @app.get("/courses")
 def get_courses():
@@ -54,6 +60,19 @@ def get_courses():
 
 @app.post("/optimize")
 def run_optimize(request: OptimizeRequests):
+    valid_codes = {c.course_code for c in COURSES}
+    
+    invalid_requests = [code for code in request.course_codes if code not in valid_codes]
+    
+    if invalid_requests:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={
+                "message": "Some course codes were not found in the system.",
+                "invalid_codes": invalid_requests
+            }
+        )
+    
     filtered_courses = [c for c in COURSES if c.course_code in request.course_codes] #Filter all coursese that the user has chosen from requests
     
     if not filtered_courses:
@@ -67,32 +86,36 @@ def run_optimize(request: OptimizeRequests):
             "results": [],
             "message": "No valid schedules found due to time conflicts. Try removing a course."
         }
+    
+    scored_schedules = [
+        (calculate_total_score(s, request.preferences), s)
+        for s in all_possible_schedules
+    ]
+    
+    scored_schedules.sort(key=lambda x: x[0], reverse=True)
+    
+    results = []
+    for rank, (score, schedule) in enumerate(scored_schedules[:3], start=1):
+        formatted_section = [
+            {
+                "course_reg_num": s.course_reg_num,
+                "course_code": s.course_code,
+                "section_id": s.section_id,
+                "time_blocks": [
+                    {"day": tb.day, "start": tb.start, "end": tb.end}
+                    for tb in s.time_blocks
+                ]
+            }
+            for s in schedule
+        ]
         
-    sorted_schedules_score = sorted(
-        all_possible_schedules,
-        key=lambda schedule: calculate_total_score(schedule, request.preferences),
-        reverse=True
-    )
-
-    return {
-    "results": [
-        {
+        results.append({
             "rank": rank,
-            "score": calculate_total_score(schedule, request.preferences),
-            "sections": [
-                {
-                    "course_reg_num": s.course_reg_num,
-                    "course_code": s.course_code,
-                    "section_id": s.section_id,
-                    "time_blocks": [
-                        {"day": tb.day, "start": tb.start, "end": tb.end}
-                        for tb in s.time_blocks
-                    ]
-                }
-                for s in schedule
-            ]
-        }
-        for rank, schedule in enumerate(sorted_schedules_score[:3], start=1)
-    ],
-    "message": "Success"
-}
+            "score": score,
+            "sections": formatted_section
+        })
+    return {
+        "results": results,
+        "message": "Success"
+    }
+

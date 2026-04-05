@@ -33,6 +33,7 @@ def get_courses():
             "name": classes.name,
             "sections": [
                 {
+                "course_reg_num": section.course_reg_num,
                 "section_id": section.section_id,
                 "time_blocks": [
                     {

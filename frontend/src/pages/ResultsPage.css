@@ -39,3 +39,71 @@
 .results-container.sidebar-open .details-sidebar {
   visibility: visible;
 }
+
+/* Sidebar content layout */
+.sidebar-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sidebar-content h2 {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+  color: #111827;
+}
+
+.sidebar-content p {
+  margin: 0;
+  font-size: 14px;
+  color: #374151;
+}
+
+/* Section buttons list */
+.section-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.section-btn {
+  padding: 10px 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #f9fafb;
+  cursor: pointer;
+  text-align: left;
+  font-size: 13px;
+  color: #374151;
+  transition: background 0.15s;
+}
+
+.section-btn:hover {
+  background: #ede9fe;
+  border-color: #6366f1;
+  color: #4f46e5;
+}
+
+.section-btn.active {
+  background: #6366f1;
+  border-color: #6366f1;
+  color: white;
+}
+
+/* Close button at bottom */
+.close-btn {
+  margin-top: auto;
+  padding: 10px;
+  background: none;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.close-btn:hover {
+  background: #f3f4f6;
+}

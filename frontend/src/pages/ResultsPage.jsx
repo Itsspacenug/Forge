@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import WeeklyGrid from '../components/WeeklyGrid';
 import './ResultsPage.css';
+import { useCourses } from '../hooks/useCourses'
+
+
 const formatMinutesToTime = (totalMinutes) => {
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
@@ -14,27 +17,28 @@ const formatMinutesToTime = (totalMinutes) => {
 
 //const ResultsPage = ({ generatedSchedules, coursedf, sectiondf, timeblockdf }) => {
 const ResultsPage = ({ schedule, onBack }) => {
-   
-  
-  // 1. Navigation State
-  //const [currentIndex, setCurrentIndex] = useState(0);
-  
+   const { data: courses = [] } = useCourses()
+
+  const [currentSchedule, setCurrentSchedule] = useState(schedule)
   // 2. Sidebar State (The "Halving" Trigger)
   const [selectedData, setSelectedData] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-    const inputdf = schedule.sections.map(s => ({
+  
+
+
+    const inputdf = currentSchedule.sections.map(s => ({
         crn: s.course_reg_num,
         code: s.course_code
     }))
 
-    const sectiondf = schedule.sections.map(s => ({
+    const sectiondf = currentSchedule.sections.map(s => ({
         crn: s.course_reg_num,
         section_id: s.section_id,
         timeblock_id: s.time_blocks.map((_, i) => `${s.course_reg_num}-${i}`)
     }))
 
-    const timeblockdf = schedule.sections.flatMap(s =>
+    const timeblockdf = currentSchedule.sections.flatMap(s =>
         s.time_blocks.map((tb, i) => ({
             timeblock_id: `${s.course_reg_num}-${i}`,
             day: tb.day,
@@ -63,6 +67,24 @@ const ResultsPage = ({ schedule, onBack }) => {
     setIsSidebarOpen(true);
   };
 
+  const handleSwap = (sec) => {
+    const newSection = {
+        course_reg_num: sec.course_reg_num,
+        course_code: selectedData.input.code,
+        section_id: sec.section_id,
+        time_blocks: sec.time_blocks
+    }
+
+    const newSections = currentSchedule.sections.map(s =>
+        s.course_code === selectedData.input.code ? newSection : s
+    )
+
+    setCurrentSchedule({ ...currentSchedule, sections: newSections })
+    setIsSidebarOpen(false)
+    setSelectedData(null)
+}
+
+
   return (
     <div className={`results-container ${isSidebarOpen ? 'sidebar-open' : ''}`}>
         <button onClick={onBack}>Back</button>
@@ -88,20 +110,37 @@ const ResultsPage = ({ schedule, onBack }) => {
 
         {/* The Detail Panel */}
         <aside className="details-sidebar">
-          {selectedData ? (
-            <div className="sidebar-content">
-              <h2>{selectedData.course?.name || "Course Details"}</h2>
-              <p><strong>Code:</strong> {selectedData.input.code}</p>
-              <p><strong>CRN:</strong> {selectedData.input.crn}</p>
-              <p><strong>Section:</strong> {selectedData.section.section_id}</p>
-              <hr />
-              <p>Start: {formatMinutesToTime(selectedData.block.start)}</p>
-              <p>End: {formatMinutesToTime(selectedData.block.end)}</p>
+        {selectedData ? (
+        <div className="sidebar-content">
+            <h2>{selectedData.course?.name || selectedData.input.code}</h2>
+            <p><strong>Code:</strong> {selectedData.input.code}</p>
+            <p><strong>CRN:</strong> {selectedData.input.crn}</p>
+            <p><strong>Section:</strong> {selectedData.section.section_id}</p>
+            <hr />
+            <p>Start: {formatMinutesToTime(selectedData.block.start)}</p>
+            <p>End: {formatMinutesToTime(selectedData.block.end)}</p>
+
+            <hr />
+            <p><strong>Other Sections</strong></p>
+            <div className="section-list">
+            {courses
+                .find(c => c.course_code === selectedData.input.code)
+                ?.sections.map(sec => (
+                <button
+                    key={sec.section_id}
+                    className={`section-btn ${sec.section_id === selectedData.section.section_id ? 'active' : ''}`}
+                    onClick={() => handleSwap(sec)}
+                >
+                    Section {sec.section_id}
+                </button>
+                ))
+            }
             </div>
-          ) : (
-            <p>Select a course to see details</p>
-          )}
-          <button onClick={() => setIsSidebarOpen(false)}>Close</button>
+        </div>
+        ) : (
+        <p style={{ color: '#9ca3af', fontSize: '14px' }}>Click a course block to see details</p>
+        )}
+        <button className="close-btn" onClick={() => setIsSidebarOpen(false)}>✕ Close</button>
         </aside>
       </div>
     </div>
